@@ -1,16 +1,16 @@
-import { HandPalm, Play } from "phosphor-react";
 import * as S from "./styles";
+import { HandPalm, Play } from "phosphor-react";
+import { useCyclesContext } from "src/context/useCyclesContext";
 
 interface IButtonProps {
   onClick: () => void;
-  isCycleActive: boolean;
   isSubmitDisabled: boolean;
 }
 
-export function Button(props: Readonly<IButtonProps>) {
-  const { onClick, isCycleActive, isSubmitDisabled } = props;
+export function Button({ onClick, isSubmitDisabled }: Readonly<IButtonProps>) {
+  const { activeCycle } = useCyclesContext();
 
-  return isCycleActive ? (
+  return activeCycle ? (
     <S.StopCountDownButton type="button" onClick={onClick}>
       <HandPalm size={24} /> Interrupt
     </S.StopCountDownButton>

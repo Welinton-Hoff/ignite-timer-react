@@ -1,15 +1,16 @@
+import * as S from "./styles";
+
 import { UseFormRegister } from "react-hook-form";
 
-import * as S from "./styles";
 import { INewCycleFormData } from "./formValidators";
+import { useCyclesContext } from "src/context/useCyclesContext";
 
 interface INewCycleFormProps {
-  activeCycle: boolean;
   register: UseFormRegister<INewCycleFormData>;
 }
 
-export function NewCycleForm(props: Readonly<INewCycleFormProps>) {
-  const { activeCycle, register } = props;
+export function NewCycleForm({ register }: Readonly<INewCycleFormProps>) {
+  const { activeCycle } = useCyclesContext();
 
   return (
     <S.FormContainer>

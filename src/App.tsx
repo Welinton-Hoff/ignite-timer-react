@@ -4,6 +4,7 @@ import { ThemeProvider } from "styled-components";
 import { Routes } from "./routes";
 import { GlobalStyle } from "./styles/global";
 import { defaultTheme } from "./styles/themes/default";
+import { CyclesContextProvider } from "./context/useCyclesContext";
 
 export function App() {
   return (
@@ -11,7 +12,9 @@ export function App() {
       <GlobalStyle />
 
       <BrowserRouter>
-        <Routes/>
+        <CyclesContextProvider>
+          <Routes />
+        </CyclesContextProvider>
       </BrowserRouter>
     </ThemeProvider>
   );
