@@ -14,7 +14,7 @@ import { useCyclesContext } from "src/context/useCyclesContext";
 import * as S from "./styles";
 
 export function Home() {
-  const { onSaveNewCycle, onInterruptCycle } = useCyclesContext();
+  const { onCreateNewCycle, onInterruptCycle } = useCyclesContext();
   const { watch, reset, register, handleSubmit } = useForm<INewCycleFormData>({
     resolver: zodResolver(newCycleFormSchema),
     defaultValues: { task: "", minutesAmount: 0 },
@@ -26,7 +26,7 @@ export function Home() {
 
   function handleCreateNewCycle(data: INewCycleFormData) {
     reset();
-    onSaveNewCycle(data);
+    onCreateNewCycle(data);
   }
 
   return (

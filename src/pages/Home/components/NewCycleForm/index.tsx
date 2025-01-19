@@ -4,6 +4,9 @@ import { UseFormRegister } from "react-hook-form";
 
 import { INewCycleFormData } from "./formValidators";
 import { useCyclesContext } from "src/context/useCyclesContext";
+import { useMemo } from "react";
+import { storageKeys } from "src/constants/storage";
+import { ICycleState } from "src/reducers/cycles/reducer";
 
 interface INewCycleFormProps {
   register: UseFormRegister<INewCycleFormData>;
@@ -11,6 +14,17 @@ interface INewCycleFormProps {
 
 export function NewCycleForm({ register }: Readonly<INewCycleFormProps>) {
   const { activeCycle } = useCyclesContext();
+
+  const taskSuggestions = useMemo(() => {
+    const storedStateAsJSON = localStorage.getItem(storageKeys.cyclesState);
+
+    if (storedStateAsJSON) {
+      const pastCycles: ICycleState = JSON.parse(storedStateAsJSON);
+      return pastCycles.cycles.map(({ task }) => task);
+    }
+
+    return [];
+  }, []);
 
   return (
     <S.FormContainer>
@@ -24,9 +38,8 @@ export function NewCycleForm({ register }: Readonly<INewCycleFormProps>) {
         placeholder="Give your project a name"
       />
       <datalist id="task-suggestions">
-        <option value="Project 1" />
-        <option value="Project 2" />
-        <option value="Project 3" />
+        {!!taskSuggestions.length &&
+          taskSuggestions.map((task) => <option key={task} value={task} />)}
       </datalist>
 
       <label htmlFor="minutesAmount">during</label>

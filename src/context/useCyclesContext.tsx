@@ -1,13 +1,23 @@
+import { differenceInSeconds } from "date-fns";
+
 import {
   useMemo,
   useState,
   ReactNode,
+  useEffect,
   useContext,
+  useReducer,
   useCallback,
   createContext,
 } from "react";
 
+import {
+  addNewCycleAction,
+  interruptCycleAction,
+} from "src/reducers/cycles/actions";
 import { ICycle } from "src/@types/cycle";
+import { storageKeys } from "src/constants/storage";
+import { cyclesReducer } from "src/reducers/cycles/reducer";
 
 interface ICyclesContextProviderProps {
   children: ReactNode;
@@ -23,7 +33,7 @@ interface ICyclesContext {
   amountSecondsPassed: number;
   activeCycleId: string | null;
   activeCycle: ICycle | undefined;
-  onSaveNewCycle: (data: INewCycleData) => void;
+  onCreateNewCycle: (data: INewCycleData) => void;
   onSetAmountSecondsPassed: (seconds: number) => void;
   onInterruptCycle: (key: "finishedDate" | "interruptedDate") => void;
 }
@@ -33,37 +43,42 @@ const CyclesContext = createContext({} as ICyclesContext);
 function CyclesContextProvider({
   children,
 }: Readonly<ICyclesContextProviderProps>) {
-  const [cycles, setCycles] = useState<ICycle[]>([]);
-  const [amountSecondsPassed, setAmountSecondsPassed] = useState(0);
-  const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
+  const [cyclesState, dispatch] = useReducer(
+    cyclesReducer,
+    { cycles: [], activeCycleId: null },
+    (initialState) => {
+      const storedStateAsJSON = localStorage.getItem(storageKeys.cyclesState);
+
+      if (storedStateAsJSON) return JSON.parse(storedStateAsJSON);
+      else return initialState;
+    }
+  );
+
+  const { cycles, activeCycleId } = cyclesState ?? {};
 
   const activeCycle = useMemo(
-    () => cycles.find((cycle) => cycle.id === activeCycleId),
+    () => cycles?.find((cycle) => cycle.id === activeCycleId),
     [cycles, activeCycleId]
   );
 
-  const onInterruptCycle = useCallback(
-    (key: keyof ICycle) => {
-      setCycles((state) =>
-        state.map((cycle) => {
-          if (cycle.id === activeCycleId)
-            return { ...cycle, [key]: new Date() };
-          else return cycle;
-        })
-      );
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState(() => {
+    if (activeCycle) {
+      return differenceInSeconds(new Date(), new Date(activeCycle.startDate));
+    }
 
-      setActiveCycleId(null);
-    },
-    [activeCycleId]
-  );
+    return 0;
+  });
 
-  const onSaveNewCycle = useCallback((data: INewCycleData) => {
+  const onInterruptCycle = useCallback((interruptCycleKey: keyof ICycle) => {
+    dispatch(interruptCycleAction(interruptCycleKey));
+  }, []);
+
+  const onCreateNewCycle = useCallback((data: INewCycleData) => {
     const newCycleId = String(new Date().getTime());
     const newCycle: ICycle = { ...data, startDate: new Date(), id: newCycleId };
 
     setAmountSecondsPassed(0);
-    setActiveCycleId(newCycleId);
-    setCycles((state) => [...state, newCycle]);
+    dispatch(addNewCycleAction(newCycle));
   }, []);
 
   const onSetAmountSecondsPassed = useCallback(
@@ -75,7 +90,7 @@ function CyclesContextProvider({
     () => ({
       cycles,
       activeCycle,
-      onSaveNewCycle,
+      onCreateNewCycle,
       onInterruptCycle,
       activeCycleId: null,
       amountSecondsPassed,
@@ -84,12 +99,19 @@ function CyclesContextProvider({
     [
       cycles,
       activeCycle,
-      onSaveNewCycle,
+      onCreateNewCycle,
       onInterruptCycle,
       amountSecondsPassed,
       onSetAmountSecondsPassed,
     ]
   );
+
+  useEffect(() => {
+    if (!cyclesState) return;
+
+    const stateJSON = JSON.stringify(cyclesState);
+    localStorage.setItem(storageKeys.cyclesState, stateJSON);
+  }, [cyclesState]);
 
   return (
     <CyclesContext.Provider value={contextValue}>
