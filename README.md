@@ -22,6 +22,7 @@ History Page:
 - **React**: A JavaScript library for building user interfaces
 - **TypeScript**: A versatile programming language
 - **Styled-Components**: For styling the app
+- **React Context API**: For managing global state
 
 ## Installation
 
