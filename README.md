@@ -2,10 +2,6 @@
 
 A simple React application designed for studying React fundamentals by creating a timer. This app allows users to start a countdown timer, interrupt it, and view a history of past timers.
 
-## About
-
-This project is a learning tool for practicing core React concepts. It includes features like a countdown timer, history of past timers, and a clean, minimalistic interface to help users manage their time and visualize progress.
-
 ## Application Screenshot
 
 Home Page:
